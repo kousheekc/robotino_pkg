@@ -26,9 +26,6 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float64MultiArray
-import array
-import math
 
 class Robotino3Teleop(Node):
 
@@ -39,25 +36,41 @@ class Robotino3Teleop(Node):
         self.subscription = self.create_subscription(Joy, 'joy', self.TeleopCallback, 10)
         
         # create publisher to cmd_vel topic
-        self.publisher= self.create_publisher(Twist, 'cmd_vel', 10)
+        self.publisher= self.create_publisher(Twist, 'cmd_vel_joy', 10)
         
         # Initialize parameters
         self.declare_parameter('forward_axis_scalling', 1.0)
         self.declare_parameter('angular_axis_scalling', 1.0)
+        self.declare_parameter('deadzone', 0.1)
         
     # callback function to publish data over cmd_vel topic based on joy_pad inputs
     def TeleopCallback(self, data):
         f_scale = self.get_parameter('forward_axis_scalling').value
-        z_scale = self.get_parameter('forward_axis_scalling').value
+        z_scale = self.get_parameter('angular_axis_scalling').value
+
+        x = data.axes[4]*f_scale
+        y = data.axes[3]*f_scale
+        w = data.axes[0]*z_scale
+
+        if (abs(x) < self.get_parameter('deadzone').value):
+            x = 0.0
+        if (abs(y) < self.get_parameter('deadzone').value):
+            y = 0.0
+        if (abs(w) < self.get_parameter('deadzone').value):
+            w = 0.0
+
+        if (x == 0.0 and y == 0.0 and w == 0.0):
+            return
+        
         p_msg = Twist()
-    
-        p_msg.linear.x = data.axes[1]*f_scale
-        p_msg.linear.y = data.axes[0]*f_scale
+
+        p_msg.linear.x = x
+        p_msg.linear.y = y
         p_msg.linear.z = 0.0
         
         p_msg.angular.x = 0.0
         p_msg.angular.y = 0.0
-        p_msg.angular.z = data.axes[3]*z_scale
+        p_msg.angular.z = w
 
         self.publisher.publish(p_msg)
 

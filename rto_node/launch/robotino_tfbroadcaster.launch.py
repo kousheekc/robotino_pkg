@@ -48,6 +48,7 @@ def launch_nodes_withconfig(context, *args, **kwargs):
     frame_id_irscan = tf_prefix+'irpcl_link'
     frame_id_irpcl = tf_prefix+'irscan_link'
     frame_id_imu = tf_prefix+'imu_link'
+    frame_id_laser = tf_prefix+'laser_link'
 
     # launch robotinobase controllers with individual namespaces
     launch_nodes = GroupAction(
@@ -73,6 +74,13 @@ def launch_nodes_withconfig(context, *args, **kwargs):
             executable='static_transform_publisher',
             output='screen',
             arguments=['0.0', '0.0', '0.10', '0.0', '0.0', '0.0', frame_id_baselink,frame_id_imu],
+        ),
+
+        Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            output='screen',
+            arguments=['0.0', '0.0', '0.10', '0.0', '0.0', '0.0', frame_id_baselink,frame_id_laser],
         ),
 
     ])
