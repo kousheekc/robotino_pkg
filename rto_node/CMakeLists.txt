@@ -31,13 +31,6 @@ find_package(RobotinoAPI2)
 set(CMAKE_MODULE_PATH /opt/rec_rpc/cmake)
 find_package(RecRpc)
 
-ament_python_install_package(${PROJECT_NAME})
-
-install(PROGRAMS
-  scripts/robotino_teleop.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
