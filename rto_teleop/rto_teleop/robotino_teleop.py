@@ -25,22 +25,22 @@ class Robotino3Teleop(Node):
         self.declare_parameter('w_axis', 0)
         self.declare_parameter('grip_button', 4)
         self.declare_parameter('drop_button', 5)
-
-        self.grip_state = False
         
     # callback function to publish data over cmd_vel topic based on joy_pad inputs
     def TeleopCallback(self, data: Joy):
         if (data.buttons[self.get_parameter('grip_button').value] == 1):
-            self.grip_state = True
+            grip_msg = DigitalReadings()
+            grip_msg.header.stamp = self.get_clock().now().to_msg()
+            grip_msg.values = [False] * 8
+            grip_msg.values[7] = True
+            self.gripper_publisher.publish(grip_msg)
         if (data.buttons[self.get_parameter('drop_button').value] == 1):
-            self.grip_state = False
+            grip_msg = DigitalReadings()
+            grip_msg.header.stamp = self.get_clock().now().to_msg()
+            grip_msg.values = [False] * 8
+            grip_msg.values[7] = False
+            self.gripper_publisher.publish(grip_msg)
 
-        grip_msg = DigitalReadings()
-        grip_msg.header.stamp = self.get_clock().now().to_msg()
-        grip_msg.values = [False] * 8
-        grip_msg.values[7] = self.grip_state
-        self.gripper_publisher.publish(grip_msg)
-    
         f_scale = self.get_parameter('forward_axis_scalling').value
         z_scale = self.get_parameter('angular_axis_scalling').value
 
